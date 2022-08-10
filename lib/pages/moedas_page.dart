@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lista_cripto/pages/moedas_detalhes.dart';
 import 'package:lista_cripto/repositories/moeda_repositor.dart';
 import 'package:intl/intl.dart';
 
@@ -17,48 +18,85 @@ class _MoedaPageState extends State<MoedaPage> {
   List<Moeda> selecionadas = [];
 
   appBarDinamica() {
-    return AppBar(
-      title: const Text('Pagina de criptomoedas'),
+    if (selecionadas.isEmpty) {
+      return AppBar(
+        title: const Text('Pagina de criptomoedas'),
+      );
+    } else {
+      return AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            setState(() {
+              selecionadas = [];
+            });
+          },
+        ),
+        title: Text('${selecionadas.length} selecionadas'),
+      );
+    }
+  }
+
+  mostrarDetalhes(Moeda moeda) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MoedasDetalhesPage(moeda: moeda),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: appBarDinamica(),
-      body: ListView.separated(
-          itemBuilder: (BuildContext context, int moeda) {
-            return ListTile(
-              leading: (selecionadas.contains(tabela[moeda]))
-                  ? const CircleAvatar(
-                      child: Icon(Icons.check),
-                    )
-                  : SizedBox(
-                      width: 40,
-                      child: Image.asset(tabela[moeda].icone),
-                    ),
-              title: Text(
-                tabela[moeda].nome,
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w500,
+        appBar: appBarDinamica(),
+        body: ListView.separated(
+            itemBuilder: (BuildContext context, int moeda) {
+              return ListTile(
+                leading: (selecionadas.contains(tabela[moeda]))
+                    ? const CircleAvatar(
+                        child: Icon(Icons.check),
+                      )
+                    : SizedBox(
+                        width: 40,
+                        child: Image.asset(tabela[moeda].icone),
+                      ),
+                title: Text(
+                  tabela[moeda].nome,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-              trailing: Text(real.format(tabela[moeda].preco)),
-              selected: selecionadas.contains(tabela[moeda]),
-              selectedTileColor: Colors.indigo[50],
-              onLongPress: () {
-                setState(() {
-                  (selecionadas.contains(tabela[moeda]))
-                      ? selecionadas.remove(tabela[moeda])
-                      : selecionadas.add(tabela[moeda]);
-                });
-              },
-            );
-          },
-          padding: const EdgeInsets.all(16),
-          separatorBuilder: (_, __) => const Divider(),
-          itemCount: tabela.length),
-    );
+                trailing: Text(real.format(tabela[moeda].preco)),
+                selected: selecionadas.contains(tabela[moeda]),
+                selectedTileColor: Colors.indigo[50],
+                onLongPress: () {
+                  setState(() {
+                    (selecionadas.contains(tabela[moeda]))
+                        ? selecionadas.remove(tabela[moeda])
+                        : selecionadas.add(tabela[moeda]);
+                  });
+                },
+                onTap: () => mostrarDetalhes(tabela[moeda]),
+              );
+            },
+            padding: const EdgeInsets.all(16),
+            separatorBuilder: (_, __) => const Divider(),
+            itemCount: tabela.length),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: selecionadas.isNotEmpty
+            ? FloatingActionButton.extended(
+                onPressed: () {},
+                icon: const Icon(Icons.star),
+                label: const Text(
+                  'Favoritar',
+                  style: TextStyle(
+                    letterSpacing: 0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
+            : null);
   }
 }
