@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lista_cripto/config/app_settingns.dart';
 import 'package:lista_cripto/pages/moedas_detalhes.dart';
 import 'package:lista_cripto/repositories/favoritas_repository.dart';
 import 'package:lista_cripto/repositories/moeda_repositor.dart';
@@ -16,14 +17,42 @@ class MoedaPage extends StatefulWidget {
 
 class _MoedaPageState extends State<MoedaPage> {
   final tabela = MoedaRepository.tabela;
-  NumberFormat real = NumberFormat.currency(locale: 'pt_BR', name: 'R\$');
+  late NumberFormat real;
+  late Map<String, String> loc;
   List<Moeda> selecionadas = [];
   late FavoritasRepository favoritas;
+
+  readNumberFormat() {
+    loc = context.watch<AppSettings>().locale;
+    real = NumberFormat.currency(locale: loc['locale'], name: loc['name']);
+  }
+
+  changeLanguageButton() {
+    final locale = loc['locale'] == 'pt_BR' ? 'en_US' : 'pt_BR';
+    final name = loc['locale'] == 'pt_BR' ? '\$' : 'R\$';
+
+    return PopupMenuButton(
+        icon: Icon(Icons.language),
+        itemBuilder: (context) => [
+              PopupMenuItem(
+                  child: ListTile(
+                leading: Icon(Icons.swap_vert),
+                title: Text('Usar $locale'),
+                onTap: () {
+                  context.read<AppSettings>().setLocale(locale, name);
+                  Navigator.pop(context);
+                },
+              ))
+            ]);
+  }
 
   appBarDinamica() {
     if (selecionadas.isEmpty) {
       return AppBar(
         title: const Text('Pagina de criptomoedas'),
+        actions: [
+          changeLanguageButton(),
+        ],
       );
     } else {
       return AppBar(
@@ -59,6 +88,7 @@ class _MoedaPageState extends State<MoedaPage> {
   Widget build(BuildContext context) {
     //favoritas = Provider.of<FavoritasRepository>(context);
     favoritas = context.watch<FavoritasRepository>();
+    readNumberFormat();
     return Scaffold(
         appBar: appBarDinamica(),
         body: ListView.separated(
